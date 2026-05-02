@@ -1,6 +1,7 @@
 from langchain_core.documents import Document
 from langchain_community.vectorstores import Chroma
-from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings
+from sklearn.metrics.pairwise import cosine_similarity
 
 def load_and_split_kb(file_path: str):
     with open(file_path, "r", encoding="utf-8") as f:
@@ -39,3 +40,12 @@ def is_relevant(scores, threshold=1.0):
         return False
     best_score = min(scores)
     return best_score < threshold 
+
+def compute_similarity(text1: str, text2: str):
+    if not text1 or not text2:
+        return 0.0
+    emb1 = embedding.embed_query(text1)
+    emb2 = embedding.embed_query(text2)
+
+    sim = cosine_similarity([emb1],[emb2])[0][0]
+    return sim

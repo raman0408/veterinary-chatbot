@@ -17,19 +17,26 @@ def load_history(phone_number: str):
     except:
         return []
 
-def save_history(phone_number: str, history):
-    file_path = get_user_file_path(phone_number)
 
-    os.makedirs(BASE_PATH, exist_ok=True)
-    with open(file_path, "w") as f:
-        json.dump(history, f, indent = 2)
+def append_message(phone_number: str, role: str, content: str, summary=None):
+    path = get_user_file_path(phone_number)
 
-def append_message(phone_number: str, role: str, content: str):
-    history = load_history(phone_number)
-
-    history.append({
+    if os.path.exists(path):
+        with open(path, "r") as f:
+            history = json.load(f)
+    else:
+        history = []
+    
+    message = {
         "role": role,
         "content": content
-    })
+    }
 
-    save_history(phone_number, history)
+    if summary:
+        message["summary"] = summary
+    
+    history.append(message)
+
+    with open(path, "w") as f:
+        json.dump(history, f, indent = 2)
+
