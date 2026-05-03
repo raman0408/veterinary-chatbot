@@ -1,7 +1,6 @@
 from langchain_core.documents import Document
 from langchain_community.vectorstores import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings
-from sklearn.metrics.pairwise import cosine_similarity
 
 def load_and_split_kb(file_path: str):
     with open(file_path, "r", encoding="utf-8") as f:
@@ -18,34 +17,18 @@ def load_and_split_kb(file_path: str):
 
 
 embedding = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+
 docs = load_and_split_kb("data/knowledge_base/kb.txt")
 
 
 vectorstore = Chroma.from_documents(documents=docs, embedding=embedding)
 
-retriever = vectorstore.as_retriever(search_kwargs={"k":2})
+def retrieve_with_scores(query: str, k: int = 1):
+    results = vectorstore.similarity_search_with_score(query, k=k)
 
-def retrieve_with_scores(query: str):
-    results = vectorstore.similarity_search_with_score(query, k=2)
-
-    contexts = []
-    scores = []
+    contexts, scores = [], []
     for doc, score in results:
         contexts.append(doc.page_content)
         scores.append(score)
     return contexts, scores
 
-def is_relevant(scores, threshold=1.0):
-    if not scores:
-        return False
-    best_score = min(scores)
-    return best_score < threshold 
-
-def compute_similarity(text1: str, text2: str):
-    if not text1 or not text2:
-        return 0.0
-    emb1 = embedding.embed_query(text1)
-    emb2 = embedding.embed_query(text2)
-
-    sim = cosine_similarity([emb1],[emb2])[0][0]
-    return sim
