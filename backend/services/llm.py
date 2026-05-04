@@ -30,15 +30,17 @@ def generate_response(prompt: str) -> str:
     data = resp.json()
     return data.get("response", "").strip()
 
-def parse_response(response: str):
-    try:
-        answer_part, summary_part = response.split("SUMMARY:")
-        answer = answer_part.replace("ANSWER:", "").replace("Answer:","").strip()
-        summary = summary_part.strip()
-    except:
-        answer = response.replace("ANSWER:","").replace("Answer:","").strip()
-        summary = ""
-    return answer, summary 
+def parse_response(raw: str):
+    if "SUMMARY:" in raw:
+        parts = raw.split("SUMMARY:")
+        answer = parts[0].replace("ANSWER:", "").strip()
+        summary = parts[1].strip()
+    else:
+        # fallback parsing
+        answer = raw.strip()
+        summary = raw.strip()
+
+    return answer, summary
 
 
 
