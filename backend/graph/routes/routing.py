@@ -1,6 +1,14 @@
 from backend.graph.states import ChatState
 THRESHOLD = 1.0
 
+def route_initial(state: ChatState):
+    if state["is_smalltalk"]:
+        print("[GRAPH DEBUG] -> route: smalltalk_response")
+        return "smalltalk_response"
+    print("[GRAPH DEBUG] -> route: retrieve_raw")
+    return "retrieve_raw"
+
+
 def route_after_raw(state: ChatState):
     best_q = state["best_q"]
     is_vague = state["is_vague"]

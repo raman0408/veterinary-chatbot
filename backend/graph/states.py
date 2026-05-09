@@ -11,6 +11,7 @@ class ChatState(TypedDict):
 
     rewritten_query: str
     is_vague: bool
+    is_smalltalk: bool
 
     response: str
     summary: str

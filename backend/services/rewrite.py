@@ -1,8 +1,12 @@
-import requests
+from openai import OpenAI
+from dotenv import load_dotenv
+import os
 
-OLLAMA_URL = "http://localhost:11434/api/generate"
-MODEL = "phi3:mini"
+load_dotenv()
 
+client = OpenAI(
+    api_key=os.getenv("OPENAI_API_KEY")
+)
 
 def rewrite_query_llm(message, history):
     """
@@ -12,7 +16,7 @@ def rewrite_query_llm(message, history):
     last_summary = None
 
     for msg in reversed(history):
-        if msg["role"] == "assistant" and msg.get("summary") != "fallback":
+        if msg["role"] == "assistant" and msg.get("summary") not in {"fallback", "smalltalk"}:
             last_summary = msg["summary"]
             break
 
@@ -41,26 +45,13 @@ User question:
 Rewritten query:
 """
 
-    resp = requests.post(
-        OLLAMA_URL,
-        json={
-            "model": MODEL,
-            "prompt": prompt,
-            "stream": False,
-            "options": {
-                "num_predict": 30,
-                "temperature": 0.1
-            }
-        },
-        timeout=60
+    response = client.responses.create(
+        model="gpt-4o-mini",
+        input=prompt
     )
-
-    resp.raise_for_status()
-    rewritten = resp.json().get("response", "").strip()
-
+    rewritten = response.output_text.strip()
     if not rewritten:
         rewritten = f"{last_summary} {message}"
 
-    print("[DEBUG] rewritten_query:", rewritten)
-
+    print("[DEBUG] rewritten_query: ", rewritten)
     return rewritten

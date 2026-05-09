@@ -1,34 +1,27 @@
-import requests
+import os
 import time
+from dotenv import load_dotenv
+from openai import OpenAI
 
-OLLAMA_URL = "http://localhost:11434/api/generate"
-MODEL = "phi3:mini"
+load_dotenv()
+
+client = OpenAI(
+    api_key=os.getenv("OPENAI_API_KEY")
+)
 
 def generate_response(prompt: str) -> str:
     print("--- LLM Call Start ---")
     start = time.time()
-
-    resp = requests.post(
-        OLLAMA_URL,
-        json={
-            "model": MODEL,
-            "prompt":prompt,
-            "stream": False,
-            "option": {
-                "num_predict":100,
-                "temperature": 0.2
-            }
-        },
-        timeout=180
+    response = client.responses.create(
+        model="gpt-4o-mini",
+        input = prompt
     )
-    end = time.time()
-
-    print(f"LLM TIME: {end - start:.2f}s")
+    elapsed = time.time() - start
+    print(f"LLM Time: {elapsed:.2f}s")
     print(f"Prompt length: {len(prompt)}")
-    print("--- LLM Call END ---")
-    resp.raise_for_status()
-    data = resp.json()
-    return data.get("response", "").strip()
+    print("--- LLM Call End ---")
+
+    return response.output_text
 
 def parse_response(raw: str):
     if "SUMMARY:" in raw:
