@@ -25,7 +25,7 @@ The system supports:
 * Smalltalk/greeting handling
 * FastAPI backend
 * HTML/CSS/JavaScript frontend
-* OpenAI API integration
+* Groq API integration
 * Modular backend architecture
 
 ---
@@ -39,7 +39,7 @@ FastAPI Backend
         ↓
 LangGraph Workflow
         ↓
-RAG Retrieval + OpenAI LLM
+RAG Retrieval + OpenAI/Groq LLM
         ↓
 Persistent Memory
 ```
@@ -257,7 +257,7 @@ pip install -r requirements.txt
 Create a `.env` file in the project root:
 
 ```env
-OPENAI_API_KEY="your_api_key_here"
+GROQ_API_KEY="your_api_key_here"
 ```
 
 ---
@@ -372,13 +372,25 @@ Loads previous chat history.
 * Authentication and user accounts
 * Deployment to cloud platforms
 * Larger veterinary knowledge base
-* Admin dashboard for monitoring
-* Voice-based interaction
 
 ---
 
 # Notes
 
-The project was initially developed using local LLM inference through Ollama. During later development and testing phases, the OpenAI API was integrated to improve inference speed and iteration efficiency while preserving the same overall architecture.
+The project was initially developed using local LLM inference through Ollama. During development, multiple inference providers were evaluated, including:
+- local Ollama models
+- OpenAI API
+- Gemini Flash
+- Groq-hosted Llama 3.1
 
-The system remains model-agnostic and can be adapted back to local models with minimal changes.
+The final submission uses:
+- Groq API
+- llama-3.1-8b-instant
+
+This configuration was selected for:
+- lower latency
+- stable inference
+- free-tier accessibility
+- OpenAI-compatible integration
+
+The architecture remains model-agnostic and can be adapted to other providers with minimal code changes.

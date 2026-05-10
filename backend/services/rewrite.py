@@ -5,8 +5,12 @@ import os
 load_dotenv()
 
 client = OpenAI(
-    api_key=os.getenv("OPENAI_API_KEY")
+    api_key=os.getenv("GROQ_API_KEY"),
+    base_url="https://api.groq.com/openai/v1"
 )
+
+
+
 
 def rewrite_query_llm(message, history):
     """
@@ -28,12 +32,23 @@ def rewrite_query_llm(message, history):
     prompt = f"""
 You are a query rewriting assistant.
 
-Convert the user's question into a standalone query using context.
+Your job is ONLY to clarify vague follow-up questions using conversation context.
+
+IMPORTANT:
+- Preserve the ORIGINAL topic of the user's question.
+- NEVER replace the user's topic with context topic.
+- If the user's query introduces a NEW topic, keep it unchanged.
+- ONLY rewrite ambiguous references like:
+  - it
+  - this
+  - explain more
+  - symptoms
+  - prevention
 
 Rules:
 - Max 10 words
-- Use ONLY the context given
-- DO NOT add new information
+- Use ONLY context when resolving ambiguous references
+- DO NOT invent or substitute topics
 - Output ONLY the rewritten query
 
 Context:
@@ -44,12 +59,22 @@ User question:
 
 Rewritten query:
 """
-
-    response = client.responses.create(
-        model="gpt-4o-mini",
-        input=prompt
+    response = client.chat.completions.create(
+        model="llama-3.1-8b-instant",
+        messages=[
+            {
+                "role": "user",
+                "content": prompt
+            }
+        ],
+        temperature=0.1,
+        max_tokens=20
     )
-    rewritten = response.output_text.strip()
+    rewritten = response.choices[0].message.content.strip()
+    rewritten = rewritten.replace("```", "")
+    rewritten = rewritten.replace("Rewritten query:", "")
+    rewritten = rewritten.strip()
+    
     if not rewritten:
         rewritten = f"{last_summary} {message}"
 

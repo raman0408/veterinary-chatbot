@@ -1,27 +1,46 @@
 import os
 import time
 from dotenv import load_dotenv
+
 from openai import OpenAI
 
 load_dotenv()
 
 client = OpenAI(
-    api_key=os.getenv("OPENAI_API_KEY")
+    api_key=os.getenv("GROQ_API_KEY"),
+    base_url="https://api.groq.com/openai/v1"
 )
+
+
+
+
+
 
 def generate_response(prompt: str) -> str:
     print("--- LLM Call Start ---")
     start = time.time()
-    response = client.responses.create(
-        model="gpt-4o-mini",
-        input = prompt
+
+    response = client.chat.completions.create(
+        model="llama-3.1-8b-instant",
+        messages=[
+            {
+                "role": "user",
+                "content": prompt
+            }
+        ],
+        temperature=0.2,
+        max_tokens=200
     )
+    text = response.choices[0].message.content.strip()
+
+
+
     elapsed = time.time() - start
     print(f"LLM Time: {elapsed:.2f}s")
     print(f"Prompt length: {len(prompt)}")
     print("--- LLM Call End ---")
 
-    return response.output_text
+    return text
 
 def parse_response(raw: str):
     if "SUMMARY:" in raw:
@@ -63,7 +82,7 @@ Also generate a SHORT SUMMARY (4-8 words) capturing the key topic.
 Context:
 {context_text}
 
-Converstaion:
+Conversation:
 {history_text}
 
 Question:
