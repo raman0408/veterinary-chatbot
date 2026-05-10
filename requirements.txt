@@ -1,7 +1,13 @@
 fastapi
 uvicorn
-python-multipart
-langchain
+
+langgraph
+
+langchain-core
 langchain-community
+langchain-huggingface
+
 chromadb
-sentence-transformers
+
+openai
+python-dotenv
